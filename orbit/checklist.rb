@@ -95,7 +95,6 @@ class Checklist
   end
 
   def update(state)
-    print "\r%20s\t%20s" % [stage, control] + (" " * 20)
 
     @next_tick.each do |f|
       f.call

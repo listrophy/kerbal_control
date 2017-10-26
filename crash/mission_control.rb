@@ -18,7 +18,6 @@ class MissionControl
 
   def looper
     krpc.space_center.active_vessel.control.sas = true
-    krpc.space_center.active_vessel.control.throttle = 1.0
 
     @states = StateFactory.new(krpc)
     @checklist = Checklist.new(krpc, self)
@@ -37,20 +36,6 @@ class MissionControl
       prev_time = curr_time
       sleep desired_dt
     end
-  end
-
-  def desired_pitch(alt)
-    if alt > 70_000
-      0
-    elsif alt < 400
-      90.0
-    else
-      90.0 * (1 - (alt / 70_000) ** 1.5)
-    end
-  end
-
-  def remove_launch_panel
-    @states.remove_launch_panel
   end
 
   def close
