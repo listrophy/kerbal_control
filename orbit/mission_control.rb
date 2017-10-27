@@ -1,6 +1,7 @@
 require 'krpc'
 require_relative './state_factory'
 require_relative './checklist'
+require_relative '../lib/reporter'
 
 class MissionControl
   attr_reader :krpc
@@ -17,25 +18,23 @@ class MissionControl
   end
 
   def looper
-    krpc.space_center.active_vessel.control.sas = true
-    krpc.space_center.active_vessel.control.throttle = 1.0
+    Reporter.run do |reporter|
+      krpc.space_center.active_vessel.control.sas = true
+      krpc.space_center.active_vessel.control.throttle = 1.0
 
-    @states = StateFactory.new(krpc)
-    @checklist = Checklist.new(krpc, self)
+      @states = StateFactory.new(krpc)
+      @checklist = Checklist.new(krpc, self)
 
-    desired_dt = 0.1
+      prev_time = krpc.space_center.active_vessel.met
 
-    prev_time = krpc.space_center.active_vessel.met
-    sleep desired_dt
+      reporter.each_tick(0.1) do
+        curr_time = krpc.space_center.active_vessel.met
+        new_state = @states.tick(curr_time - prev_time, reporter)
 
-    loop do
-      curr_time = krpc.space_center.active_vessel.met
-      new_state = @states.tick(curr_time - prev_time)
+        @checklist.update(new_state)
 
-      @checklist.update(new_state)
-
-      prev_time = curr_time
-      sleep desired_dt
+        prev_time = curr_time
+      end
     end
   end
 

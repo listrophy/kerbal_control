@@ -17,6 +17,7 @@ class StateFactory
     @streams[:time_to_apoapsis] = orbit.time_to_apoapsis_stream
     @streams[:periapsis] = orbit.periapsis_altitude_stream
     @streams[:pitch] = flight.pitch_stream
+    @streams[:speed] = orbit.speed_stream
     @streams[:heading] = flight.heading_stream
     @streams[:direction] = flight.direction_stream
     @streams[:rotation] = flight.rotation_stream
@@ -74,12 +75,17 @@ class StateFactory
     @launch_panel.remove
   end
 
-  def tick(dt)
+  def tick(dt, reporter)
     hash = streams.reduce({}) do |memo, (name, stream)|
       memo.merge({name => stream.get})
     end
 
     @current_state = @state_class.new(hash, @current_state, dt)
+
+    attrs = %i(altitude speed pitch stage)
+    reporter.report('orbit', hash.select{|k,_| attrs.include?(k)})
+
+    @current_state
   end
 
 end
