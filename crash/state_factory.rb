@@ -8,11 +8,15 @@ class StateFactory
     vessel = @ksp.space_center.active_vessel
     #flight = vessel.flight
     orbit = vessel.orbit
-    #control = vessel.control
+    control = vessel.control
 
     @streams[:apoapsis] = orbit.apoapsis_altitude_stream
     @streams[:periapsis] = orbit.periapsis_altitude_stream
     @streams[:radius] = orbit.radius_stream
+    @streams[:throttle] = control.throttle_stream
+    @streams[:stage] = control.current_stage_stream
+    @streams[:body] = orbit.body_stream
+    @streams[:warp] = @ksp.space_center.rails_warp_factor_stream
     @munar_radius = @ksp.space_center.bodies['Mun'].equatorial_radius
     @munar_semimajor_axis = @ksp.space_center.bodies['Mun'].orbit.semi_major_axis
 
@@ -54,7 +58,7 @@ class StateFactory
     end
   end
 
-  def tick(dt)
+  def tick(dt, reporter)
     hash = streams.reduce({}) do |memo, (name, stream)|
       memo.merge({name => stream.get})
     end.merge({
@@ -64,6 +68,17 @@ class StateFactory
     })
 
     @current_state = @state_class.new(hash, @current_state, dt)
+
+    reporter.report('crash', {
+      throttle: hash[:throttle],
+      periapsis: hash[:periapsis],
+      apoapsis: hash[:apoapsis],
+      stage: hash[:stage],
+      orbitingBody: hash[:body].name,
+      warpFactor: hash[:warp]
+    })
+
+    @current_state
   end
 
   def get_munar_periapsis
