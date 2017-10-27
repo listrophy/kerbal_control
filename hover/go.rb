@@ -15,8 +15,6 @@ sleep 1
 puts " Liftoff!"
 
 Reporter.run do |reporter|
-
-
   vessel = client.space_center.active_vessel
   ctrl = vessel.control
   ctrl.sas = true

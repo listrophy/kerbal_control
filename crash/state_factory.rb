@@ -58,7 +58,7 @@ class StateFactory
     end
   end
 
-  def tick(dt, reporter)
+  def tick(dt, reporter, checklist)
     hash = streams.reduce({}) do |memo, (name, stream)|
       memo.merge({name => stream.get})
     end.merge({
@@ -73,7 +73,7 @@ class StateFactory
       throttle: hash[:throttle],
       periapsis: hash[:periapsis],
       apoapsis: hash[:apoapsis],
-      stage: hash[:stage],
+      stage: checklist.state_id,
       orbitingBody: hash[:body].name,
       warpFactor: hash[:warp]
     })

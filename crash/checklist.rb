@@ -4,6 +4,21 @@ require 'state_machines'
 class Checklist
   attr_reader :krpc, :mc
 
+  def state_id
+    [ :determining_insertion_burn_delta_v,
+      :determining_insertion_burn_location,
+      :waiting_for_insertion_burn_far,
+      :waiting_for_insertion_burn_mid,
+      :waiting_for_insertion_burn_near,
+      :insertion_burning,
+      :finalizing_insertion_burn,
+      :transmunar_orbit,
+      :outer_munar_orbit,
+      :mid_munar_orbit,
+      :final_approach
+    ].index(self.control_name)
+  end
+
   state_machine :control, initial: :determining_insertion_burn_delta_v do
     {
       insertion_burn_delta_v_determined: :determining_insertion_burn_location,

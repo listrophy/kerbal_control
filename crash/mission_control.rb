@@ -28,7 +28,7 @@ class MissionControl
 
       reporter.each_tick(0.1) do
         curr_time = krpc.space_center.active_vessel.met
-        new_state = @states.tick(curr_time - prev_time, reporter)
+        new_state = @states.tick(curr_time - prev_time, reporter, @checklist)
 
         @checklist.update(new_state)
 
